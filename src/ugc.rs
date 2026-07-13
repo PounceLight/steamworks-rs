@@ -509,6 +509,28 @@ unsafe impl Callback for DownloadItemResult {
     }
 }
 
+/// Signaled when the user's list of subscribed items changes for the running
+/// app, e.g. after subscribing or unsubscribing on the Workshop web page.
+/// Diff [`UGC::subscribed_items`] against your own state to find out what
+/// changed.
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct UserSubscribedItemsListChanged {
+    pub app_id: AppId,
+}
+
+unsafe impl Callback for UserSubscribedItemsListChanged {
+    const ID: i32 = CALLBACK_BASE_ID + 18;
+    const SIZE: i32 = ::std::mem::size_of::<sys::UserSubscribedItemsListChanged_t>() as i32;
+
+    unsafe fn from_raw(raw: *mut c_void) -> Self {
+        let val = &mut *(raw as *mut sys::UserSubscribedItemsListChanged_t);
+        UserSubscribedItemsListChanged {
+            app_id: AppId(val.m_nAppID),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct InstallInfo {
