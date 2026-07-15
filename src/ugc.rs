@@ -983,14 +983,17 @@ impl<Manager> UpdateHandle<Manager> {
         self
     }
 
+    /// Removes every value of `key`. A no-op when the item never had the key.
+    /// Note that this does *not* assert on a `false` return in order to make
+    /// retagging possible.
     pub fn remove_key_value_tag(self, key: &str) -> Self {
         unsafe {
             let key = CString::new(key).unwrap();
-            assert!(sys::SteamAPI_ISteamUGC_RemoveItemKeyValueTags(
+            let _ = sys::SteamAPI_ISteamUGC_RemoveItemKeyValueTags(
                 self.ugc,
                 self.handle,
-                key.as_ptr()
-            ));
+                key.as_ptr(),
+            );
         }
         self
     }
