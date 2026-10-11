@@ -125,23 +125,40 @@ impl<Manager> Input<Manager> {
         }
     }
 
-    /// Returns the glyph for an input action
-    pub fn get_glyph_for_action_origin(&self, action_origin: sys::EInputActionOrigin) -> String {
+    /// Returns the glyph for an input action. Returns `None` if Steam has no legacy glyph
+    /// for the origin, e.g. for origins of controllers newer than the legacy glyph set.
+    pub fn get_glyph_for_action_origin(
+        &self,
+        action_origin: sys::EInputActionOrigin,
+    ) -> Option<String> {
         unsafe {
             let glyph_path =
                 sys::SteamAPI_ISteamInput_GetGlyphForActionOrigin_Legacy(self.input, action_origin);
+
+            if glyph_path.is_null() {
+                return None;
+            }
+
             let glyph_path = CStr::from_ptr(glyph_path);
-            glyph_path.to_string_lossy().into_owned()
+            Some(glyph_path.to_string_lossy().into_owned())
         }
     }
 
-    /// Returns the name of an input action
-    pub fn get_string_for_action_origin(&self, action_origin: sys::EInputActionOrigin) -> String {
+    /// Returns the name of an input action. Returns `None` if Steam has no name for the origin.
+    pub fn get_string_for_action_origin(
+        &self,
+        action_origin: sys::EInputActionOrigin,
+    ) -> Option<String> {
         unsafe {
             let name_path =
                 sys::SteamAPI_ISteamInput_GetStringForActionOrigin(self.input, action_origin);
+
+            if name_path.is_null() {
+                return None;
+            }
+
             let name_path = CStr::from_ptr(name_path);
-            name_path.to_string_lossy().into_owned()
+            Some(name_path.to_string_lossy().into_owned())
         }
     }
 
